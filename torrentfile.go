@@ -12,7 +12,8 @@ type TorrentFile struct {
     Name        string
 }
 
-func (bto bencodeTorrent) toTorrentFile() (TorrentFile, error) {
+func (bto bencodeTorrent) ToTorrentFile() (TorrentFile, error) {
 // …
-return nil
+    torrentFile := TorrentFile{} 
+    return torrentFile, nil
 }
