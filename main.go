@@ -1,9 +1,9 @@
 package main
 
 import (
+	"Bittorrent/hashing"
 	"Bittorrent/parse"
 	"bytes"
-	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -61,24 +61,23 @@ func main() {
 			return
 		}
 
-		hash := sha1.New()
-		//encode the torrentData.Info and write to the hash object.
-		hashErr := bencode.Marshal(hash, torrentData.Info)
+		hashing.HashPieces(*torrentData)
 
-		//In Go, hash.Sum is used to finalize and retrieve the result of a hash computation,
-		if hashErr != nil {
-			fmt.Println("failed to hash data: %w", hashErr)
-			return
-		}
+		// infoHash, hashErr := hashing.InfoHash(*torrentData)
 
-		sum := hash.Sum(nil)
-		// to understand the %x read: https://pkg.go.dev/fmt
-		fmt.Printf("Info Hash: %x\n", sum)
+		// //In Go, hash.Sum is used to finalize and retrieve the result of a hash computation,
+		// if hashErr != nil {
+		// 	fmt.Println("failed to hash data: %w", hashErr)
+		// 	return
+		// }
 
-		fmt.Println("Piece Length:", torrentData.Info.PieceLength)
-		fmt.Println("Total Length:", torrentData.Info.Length)
-		fmt.Println("File Name:", torrentData.Info.Name)
-		fmt.Println("Announce URL:", torrentData.Announce)
+		// // to understand the %x read: https://pkg.go.dev/fmt
+		// fmt.Printf("Info Hash: %x\n", infoHash)
+
+		// fmt.Println("Piece Length:", torrentData.Info.PieceLength)
+		// fmt.Println("Total Length:", torrentData.Info.Length)
+		// fmt.Println("File Name:", torrentData.Info.Name)
+		// fmt.Println("Announce URL:", torrentData.Announce)
 
 	}
 

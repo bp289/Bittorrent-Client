@@ -3,6 +3,7 @@ package hashing
 import (
 	"Bittorrent/parse"
 	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 
 	"github.com/jackpal/bencode-go"
@@ -20,4 +21,28 @@ func InfoHash(torrentData parse.BencodeTorrent) ([]byte, error) {
 		return nil, fmt.Errorf("failed to parse bencoded data: %w", hashErr)
 	}
 	return sum, nil
+}
+
+func HashPieces(torrentData parse.BencodeTorrent) ([]string, error) {
+
+	pieces := torrentData.Info.Pieces
+	var pieceHashes []string
+	//each pieces hash is 20 bytes long, therefore we iterate over the pieces in steps of 20
+	for i := 0; i < len(pieces); i += 20 {
+
+		if i+20 > len(pieces) {
+			break
+		}
+		// the pieces are of length 20 therefore we iterate 20 times
+		pieceHash := pieces[i : i+20]
+		pieceHashes = append(pieceHashes, hex.EncodeToString([]byte(pieceHash)))
+
+		// fmt.Printf("Piece %d hash: %x\n", i/20, pieceHash)
+	}
+
+	fmt.Printf("Piece Length: %v bytes\n", torrentData.Info.PieceLength)
+	fmt.Printf("Total Number of Piece Hashes: %v\n", len(pieceHashes))
+	fmt.Printf("Length: %v\n", torrentData.Info.Length)
+
+	return pieceHashes, nil
 }
