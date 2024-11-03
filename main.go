@@ -1,11 +1,14 @@
 package main
 
 import (
-	"io"
-    "encoding/json"
+	"Bittorrent/parse"
+	"bytes"
+	"crypto/sha1"
+	"encoding/json"
 	"fmt"
+	"io"
 	"os"
-    
+
 	"github.com/jackpal/bencode-go"
 )
 
@@ -40,8 +43,9 @@ func main() {
 
 	command := os.Args[1]
 
-	if command == "decode" {
-		
+	switch command {
+	case "decode":
+
 		bencodedValue := os.Args[2]
 
 		decoded_, err := bencode.Decode(bytes.NewReader([]byte(bencodedValue)))
@@ -54,8 +58,46 @@ func main() {
 		
 		jsonOutput, _ := json.Marshal(decoded_)
 		fmt.Println(string(jsonOutput))
-	} else {
-		fmt.Println("Unknown command: " + command)
-		os.Exit(1)
+
+	case "info":
+		inputFile := os.Args[2]
+
+
+		file, err := os.Open(inputFile)
+		
+
+		if err != nil {
+			fmt.Printf("error reading file %v\n", err)
+			return
+		}
+
+		torrentData, unmarshErr := parse.Parse(file)
+
+
+		if unmarshErr != nil {
+			fmt.Println("failed to parse bencoded data: %w", unmarshErr)
+			return
+		}
+
+		hash := sha1.New()
+		//encode the torrentData.Info and write to the hash object. 
+		hashErr := bencode.Marshal(hash, torrentData.Info)
+
+		//In Go, hash.Sum is used to finalize and retrieve the result of a hash computation,
+		if hashErr != nil {
+			fmt.Println("failed to hash data: %w", hashErr)
+			return
+		}
+		
+		// to understand the %x read: https://pkg.go.dev/fmt
+		fmt.Printf("Info Hash: %x\n", hash.Sum(nil))
+		
+		fmt.Println("Piece Length:", torrentData.Info.PieceLength)
+		fmt.Println("Total Length:", torrentData.Info.Length)
+		fmt.Println("File Name:", torrentData.Info.Name)
+		fmt.Println("Announce URL:", torrentData.Announce)
+		
+
 	}
+
 }
