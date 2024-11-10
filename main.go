@@ -1,5 +1,6 @@
 package main
 
+//TODO: Discover peers - make a request to the HTTP tracker to discover peers to download the file from.
 import (
 	"Bittorrent/hashing"
 	"Bittorrent/parse"
@@ -13,8 +14,8 @@ import (
 )
 
 // Open parses a torrent file
-func Open(reader io.Reader) (*parse.BencodeTorrent, error) {
-	bto := parse.BencodeTorrent{}
+func Open(reader io.Reader) (*parse.TorrentDetails, error) {
+	bto := parse.TorrentDetails{}
 	err := bencode.Unmarshal(reader, &bto)
 	if err != nil {
 		return nil, err
@@ -61,23 +62,28 @@ func main() {
 			return
 		}
 
-		hashing.HashPieces(*torrentData)
+		pieceHashes, pieceHashErr := hashing.HashPieces(*torrentData)
 
-		// infoHash, hashErr := hashing.InfoHash(*torrentData)
+		if pieceHashErr != nil {
+			fmt.Println("failed to hash data: %w", pieceHashErr)
+		}
 
-		// //In Go, hash.Sum is used to finalize and retrieve the result of a hash computation,
-		// if hashErr != nil {
-		// 	fmt.Println("failed to hash data: %w", hashErr)
-		// 	return
-		// }
+		torrentData.PieceHashes = pieceHashes
 
-		// // to understand the %x read: https://pkg.go.dev/fmt
-		// fmt.Printf("Info Hash: %x\n", infoHash)
+		infoHash, hashErr := hashing.InfoHash(*torrentData)
 
-		// fmt.Println("Piece Length:", torrentData.Info.PieceLength)
-		// fmt.Println("Total Length:", torrentData.Info.Length)
-		// fmt.Println("File Name:", torrentData.Info.Name)
-		// fmt.Println("Announce URL:", torrentData.Announce)
+		if hashErr != nil {
+			fmt.Println("failed to hash data: %w", hashErr)
+			return
+		}
+
+		// to understand the %x read: https://pkg.go.dev/fmt
+		fmt.Printf("Info Hash: %x\n", infoHash) // printf is for formatting and %x tells us to print in sexadecimal format.
+		// fmt.Printf("Piece Hash: %x\n", pieceHashes)
+		fmt.Println("Piece Length:", torrentData.Info.PieceLength)
+		fmt.Println("Total Length:", torrentData.Info.Length)
+		fmt.Println("File Name:", torrentData.Info.Name)
+		fmt.Println("Announce URL:", torrentData.Announce)
 
 	}
 

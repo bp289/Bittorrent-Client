@@ -9,7 +9,7 @@ import (
 	"github.com/jackpal/bencode-go"
 )
 
-func InfoHash(torrentData parse.BencodeTorrent) ([]byte, error) {
+func InfoHash(torrentData parse.TorrentDetails) ([]byte, error) {
 
 	hash := sha1.New()
 	//encode the torrentData.Info and write to the hash object.
@@ -23,7 +23,7 @@ func InfoHash(torrentData parse.BencodeTorrent) ([]byte, error) {
 	return sum, nil
 }
 
-func HashPieces(torrentData parse.BencodeTorrent) ([]string, error) {
+func HashPieces(torrentData parse.TorrentDetails) ([]string, error) {
 
 	pieces := torrentData.Info.Pieces
 	var pieceHashes []string

@@ -14,18 +14,24 @@ type BencodeInfo struct {
 	Name        string `bencode:"name"`
 }
 
-type BencodeTorrent struct {
-	Announce string      `bencode:"announce"`
-	Info     BencodeInfo `bencode:"info"`
+type TorrentDetails struct {
+	Announce    string      `bencode:"announce"`
+	Info        BencodeInfo `bencode:"info"`
+	PieceHashes []string
 }
 
-func Parse(reader io.Reader) (*BencodeTorrent, error) {
+func Parse(reader io.Reader) (*TorrentDetails, error) {
 
-	data := BencodeTorrent{}
+	data := TorrentDetails{}
 	err := bencode.Unmarshal(reader, &data)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse bencoded data: %w", err)
 	}
 	return &data, nil
+}
+
+type BencodeTorrentWithPH struct {
+	TorrentDetails // Embedding BencodeTorrent to inherit its fields
+	PieceHashes    [][]string
 }
