@@ -22,7 +22,7 @@ type TorrentPeers struct {
 	Peers    string
 }
 
-func FindPeers(trackerUrl string, infoHash []byte) {
+func FindPeers(trackerUrl string, infoHash []byte) ([]string, error) {
 	port := 6881
 	peer_id := generatePeerId()
 
@@ -45,6 +45,7 @@ func FindPeers(trackerUrl string, infoHash []byte) {
 
 	if err != nil {
 		log.Fatalln(err)
+		return nil, err
 	}
 
 	var responseDecoded TorrentPeers
@@ -53,6 +54,7 @@ func FindPeers(trackerUrl string, infoHash []byte) {
 
 	if bencodeErr != nil {
 		log.Fatalln(bencodeErr)
+		return nil, err
 	}
 
 	var peers = make([]string, 0)
@@ -79,6 +81,7 @@ func FindPeers(trackerUrl string, infoHash []byte) {
 		peers = append(peers, ipPortStr)
 	}
 
+	return peers, nil
 }
 
 func generatePeerId() string {
